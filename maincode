@@ -1,0 +1,38 @@
+import tkinter as tk
+from tkinter import *
+
+class App:
+    def screen1(self, root):
+        root.title("Amazing butler app")
+        root.width = 600
+        root.height = 500
+        
+        file_list = ["Open new window", "Restart", "Close"]
+        value_file = tk.StringVar(root)
+        value_file.set("File")
+        self.filedrop = tk.OptionsMenu(root, value_file, *file_list)
+        self.filedrop.grid(row =1, column = 0)
+        
+        edit_list = ["Undo", "Redo", "Copy","Paste"]
+        value_edit = tk.StringVar(root)
+        value_edit.set("Edit")
+        self.editdrop = tk.OptionsMenu(root, value_edit, *edit_list)
+        self.editdrop.grid(row=1, column = 1)
+        
+        options_list = ["1", "2", "3"]
+        value_options = tk.StringVar(root)
+        value_options.set("Options")
+        self.optionsdrop = tk.OptionsMenu(root, value_options, *options_list)
+        self.optionsdrop.grid(row=1, column= 2)
+        
+        tools_list = ["Preferences", "Reset/Erase"]
+        value_tools = tk.StringVar(root)
+        value_tools.set("Tools")
+        self.toolsdrop = tk.OptionsMenu(root, value_tools, *tools_list)
+        self.toolsdrop.gri(row =1, column=3)
+        
+        help_list = ["Call customer support", "Chat", "FAQ's"]
+        value_help = tk.StringVar(root)
+        value_help.set("Help")
+        self.helpdrop = tk.OptionsMenu(root, value_help, *help_list)
+        self.helpdrop.grid(row = 1, column= 4)
