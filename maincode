@@ -1,38 +1,598 @@
-import tkinter as tk
-from tkinter import *
+import tkinter as tk                
+from tkinter import font  as tkfont 
+import sqlite3
+import time
+import datetime
+from datetime import date
+import random
+import pandas as pd
+import numpy
 
-class App:
-    def screen1(self, root):
-        root.title("Amazing butler app")
-        root.width = 600
-        root.height = 500
+
+conn = sqlite3.connect('transactions.db') #making sqlite3 database
+c = conn.cursor()
+#c.execute("""CREATE TABLE transactions (
+           #category text,
+           #Amount integer,
+           #date text
+           # )""")
+
+
+
+edb = 0
+class SampleApp(tk.Tk): #main class to alow changing frames
+
+
+    def __init__(self, *args, **kwargs):
+        tk.Tk.__init__(self, *args, **kwargs)
+
+        container = tk.Frame(self)
+        container.pack(side="top", fill="both", expand=True)
+        container.grid_rowconfigure(0, weight=1)
+        container.grid_columnconfigure(0, weight=1)
+
+        self.frames = {}
+        for F in (LoginPage, MainMenu, txnPage):
+            page_name = F.__name__
+            frame = F(parent=container, controller=self)
+            self.frames[page_name] = frame
+
+            # put all of the pages in the same location;
+            # the one on the top of the stacking order
+            # will be the one that is visible.
+            frame.grid(row=0, column=0, sticky="nsew")
+
+        self.show_frame("LoginPage")
+
+    def show_frame(self, page_name):
+        '''Show a frame for the given page name'''
+        frame = self.frames[page_name]
+        frame.tkraise()
+
+
+class LoginPage(tk.Frame): #class for login page
+    
+                   
+    
+    def __init__(self, parent, controller):
         
-        file_list = ["Open new window", "Restart", "Close"]
-        value_file = tk.StringVar(root)
-        value_file.set("File")
-        self.filedrop = tk.OptionsMenu(root, value_file, *file_list)
-        self.filedrop.grid(row =1, column = 0)
+        tk.Frame.__init__(self, parent)
+        self.controller = controller
+        tk.Frame.__init__(self, parent, bg= 'dark slate blue') #setting bg colour of login page
         
-        edit_list = ["Undo", "Redo", "Copy","Paste"]
-        value_edit = tk.StringVar(root)
-        value_edit.set("Edit")
-        self.editdrop = tk.OptionsMenu(root, value_edit, *edit_list)
-        self.editdrop.grid(row=1, column = 1)
+        def doNothing():
+            print(" ")
         
-        options_list = ["1", "2", "3"]
-        value_options = tk.StringVar(root)
-        value_options.set("Options")
-        self.optionsdrop = tk.OptionsMenu(root, value_options, *options_list)
-        self.optionsdrop.grid(row=1, column= 2)
+        menu=tk.Menu(self) # to create options menu on the top
+        self.config(menu=menu)
         
-        tools_list = ["Preferences", "Reset/Erase"]
-        value_tools = tk.StringVar(root)
-        value_tools.set("Tools")
-        self.toolsdrop = tk.OptionsMenu(root, value_tools, *tools_list)
-        self.toolsdrop.gri(row =1, column=3)
+        subMenu = tk.Menu(menu)
+        menu.add_cascade(label="File", menu=subMenu)
+        subMenu.add_command(label="Option1", command= doNothing) 
+        subMenu.add_command(label="Option2", command= doNothing)
+        subMenu.add_command(label="Option3", command= doNothing)
         
-        help_list = ["Call customer support", "Chat", "FAQ's"]
-        value_help = tk.StringVar(root)
-        value_help.set("Help")
-        self.helpdrop = tk.OptionsMenu(root, value_help, *help_list)
-        self.helpdrop.grid(row = 1, column= 4)
+        editMenu = tk.Menu(menu)
+        editMenu.add_command(label="Option1", command= doNothing)
+        editMenu.add_command(label="Option2", command= doNothing)
+        editMenu.add_command(label="Option3", command= doNothing)
+        
+        optionsMenu = tk.Menu(menu)
+        optionsMenu.add_command(label="Option1", command= doNothing)
+        optionsMenu.add_command(label="Option2", command= doNothing)
+        optionsMenu.add_command(label="Option3", command= doNothing)
+        
+        toolsMenu = tk.Menu(menu)
+        toolsMenu.add_command(label="Option1", command= doNothing)
+        toolsMenu.add_command(label="Option2", command= doNothing)
+        toolsMenu.add_command(label="Option3", command= doNothing)
+        
+        windowMenu = tk.Menu(menu)
+        windowMenu.add_command(label="Option1", command= doNothing)
+        windowMenu.add_command(label="Option2", command= doNothing)
+        windowMenu.add_command(label="Option3", command= doNothing)
+        
+        helpMenu = tk.Menu(menu)
+        helpMenu.add_command(label="Option1", command= doNothing)
+        helpMenu.add_command(label="Option2", command= doNothing)
+        helpMenu.add_command(label="Option3", command= doNothing)
+        
+        headingLabel = tk.Label(self, text='Welcome to Amazing Butler',
+                                font=('Agency FB',45,'bold'), foreground='White', 
+                                background = 'dark slate blue')
+        headingLabel.pack(pady=25)
+        
+        space_label = tk.Label(self, height=4, bg='dark slate blue')
+        space_label.pack()
+        
+        pwd_label = tk.label(self, text='Enter password', font=('Agency FB',13), bg='dark slate blue', fg='white')
+        pwd_label.pack(pady=10)
+        
+        #to enter password
+        my_pwd = tk.StringVar()
+        pwdfield = tk.Entry(self, textvariable=my_pwd,
+                            cursor = '*' )
+        pwdfield.pack()
+        #enter 
+        def check_pwd(): #function to check password from text file
+             file = open('amazingButlerApp.txt', 'a+')
+             passwd = file.read(1) 
+             if my_pwd.get() == passwd:
+                 controller.show_frame("MainMenu")
+             else:
+                tk.messagebox.showinfo("AmazingButlerAuthentification", "Wrong Password")
+                     
+        loginButton = tk.Button(self, bg='midnight blue', font=('Agency FB', 15), fg='black',
+                                text='Login', command= check_pwd, relief='raised',
+                                borderwidth=3, width=30, height=3)
+        loginButton.pack(pady=10)
+        
+        def tick(): #function for time
+            current_time = time.strftime('%I:%M %p')
+            time_label.config(text=current_time)
+            time_label.after(200, tick)
+        
+        time_label = tk.Label(self, font =('Agency FB', 12))
+        time_label.pack(side='left')
+        tick()
+
+               
+            
+
+
+class MainMenu(tk.Frame): #main mebu page UI
+    
+    edb=0
+    def logout(self):
+         self.destroy()
+
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent, bg='White')
+        self.controller = controller
+        
+        menu=tk.Menu(self)
+        self.config(menu=menu)
+        def doNothing():
+             print(" ")
+        subMenu = tk.Menu(menu)
+        menu.add_cascade(label="File", menu=subMenu)
+        subMenu.add_command(label="Option1", command= doNothing) 
+        subMenu.add_command(label="Option2", command= doNothing)
+        subMenu.add_command(label="Option3", command= doNothing)
+
+        editMenu = tk.Menu(menu)
+        menu.add_cascade(label="Edit", menu=editMenu)
+        editMenu.add_command(label="Option1", command= doNothing)
+        editMenu.add_command(label="Option2", command= doNothing)
+        editMenu.add_command(label="Option3", command= doNothing)
+
+        optionsMenu = tk.Menu(menu)
+        menu.add_cascade(label="Options", menu=optionsMenu)
+        optionsMenu.add_command(label="Option1", command= doNothing)
+        optionsMenu.add_command(label="Option2", command= doNothing)
+        optionsMenu.add_command(label="Option3", command= doNothing)
+        
+        toolsMenu = tk.Menu(menu)
+        menu.add_cascade(label="Tools", menu=toolsMenu)
+        toolsMenu.add_command(label="Option1", command= doNothing)
+        toolsMenu.add_command(label="Option2", command= doNothing)
+        toolsMenu.add_command(label="Option3", command= doNothing)
+        
+        windowMenu = tk.Menu(menu)
+        menu.add_cascade(label="Window", menu=windowMenu)
+        windowMenu.add_command(label="Option1", command= doNothing)
+        windowMenu.add_command(label="Option2", command= doNothing)
+        windowMenu.add_command(label="Option3", command= doNothing)
+            
+        helpMenu = tk.Menu(menu)
+        menu.add_cascade(label="Help", menu=helpMenu)
+        helpMenu.add_command(label="Option1", command= doNothing)
+        helpMenu.add_command(label="Option2", command= doNothing)
+        helpMenu.add_command(label="Option3", command= doNothing)
+
+        def tick():
+            current_time = time.strftime('%I:%M %p')
+            time_label.config(text=current_time)
+            time_label.after(200, tick)
+        
+        time_label = tk.Label(self, font =('Agency FB', 100))
+        time_label.grid(row=0, column =0)
+        tick()
+        today = date.today()
+        d4 = today.strftime("%b-%d-%Y")
+        datelbl = tk.Label(self, text= d4, font=('Agency FB', 70))
+        datelbl.grid(row=2, column=0, pady=50)
+ 
+       
+        file = open('amazingButlerApp.txt', 'a+')
+        money = file.read(2)
+        edb =int(money)  
+
+        moneylbl = tk.Label(self, font=('Agency FB',40), fg='black', 
+                      text=('Euros in da Bank : ', edb, 'EUR') , width = 45, height = 2 )
+        moneylbl.grid(row=0, column=2, pady=60)
+
+        logoutButton = tk.Button(self, bg='blue2', font=('Arial', 15), fg='White',
+                                 text='Logout', width=30,justify='left', command = lambda:self.destroy())
+        logoutButton.grid(row=0, column=3, padx=5)
+
+        Addtxnbtn = tk.Button(self, bg='blue2', font=('Arial', 15), fg='White',
+                                 text='Add transaction',width=30,justify='left', command = controller.show_frame("txnPage"))
+        Addtxnbtn.grid(row=1, column=3, padx=20)
+
+        editbtn = tk.Button(self, bg='blue2', font=('Arial', 15), fg='White',
+                                 text='Edit Account',width=30,justify='left', command = controller.show_frame("MainMenu"))
+        editbtn.grid(row=2, column=3, padx=20)
+
+        setupbtn = tk.Button(self, bg='blue2', font=('Arial', 15), fg='White',
+                                 text='Setup',width=30,justify='left', command = doNothing)
+        setupbtn.grid(row=3, column=3, padx=20)
+
+        smmarybtn = tk.Button(self, bg='blue2', font=('Arial', 15), fg='White',
+                                 text='Summary',width=30,justify='left', command = doNothing)
+        smmarybtn.grid(row=4, column=3, padx=20, pady=40)
+        
+        def lotto():
+            x = random.randint(1,40000)
+            file = open('amazingButlerApp.txt', 'a+')
+            file.seek(2)
+            file.write(int(edb)-100)
+            if x==3:
+                tk.messagebox.showinfo("AmazingButler", "You won, you're rich")
+                file.seek(2)
+                file.write(int(edb)+10000)
+            else:
+                tk.messagebox.showinfo("AmazingButler", "You lost")
+                
+
+        lottobtn = tk.Button(self, bg='blue2', font=('Arial', 15), fg='White',
+                                 text='Play Lotto',width=30,justify='left', command = lotto)
+        lottobtn.grid(row=5, column =3, padx=20, pady =30)
+         
+
+
+class txnPage(tk.Frame):
+    
+        
+   
+    
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+        self.controller = controller
+        
+        menu=tk.Menu(self)
+        self.config(menu=menu)
+        def doNothing():
+            print(" ")
+            subMenu = tk.Menu(menu)
+            menu.add_cascade(label="File", menu=subMenu)
+            subMenu.add_command(label="Option1", command= doNothing) 
+            subMenu.add_command(label="Option2", command= doNothing)
+            subMenu.add_command(label="Option3", command= doNothing)
+
+            editMenu = tk.Menu(menu)
+            menu.add_cascade(label="Edit", menu=editMenu)
+            editMenu.add_command(label="Option1", command= doNothing)
+            editMenu.add_command(label="Option2", command= doNothing)
+            editMenu.add_command(label="Option3", command= doNothing)
+
+            optionsMenu = tk.Menu(menu)
+            menu.add_cascade(label="Options", menu=optionsMenu)
+            optionsMenu.add_command(label="Option1", command= doNothing)
+            optionsMenu.add_command(label="Option2", command= doNothing)
+            optionsMenu.add_command(label="Option3", command= doNothing)
+            
+            toolsMenu = tk.Menu(menu)
+            menu.add_cascade(label="Tools", menu=toolsMenu)
+            toolsMenu.add_command(label="Option1", command= doNothing)
+            toolsMenu.add_command(label="Option2", command= doNothing)
+            toolsMenu.add_command(label="Option3", command= doNothing)
+            
+            windowMenu = tk.Menu(menu)
+            menu.add_cascade(label="Window", menu=windowMenu)
+            windowMenu.add_command(label="Option1", command= doNothing)
+            windowMenu.add_command(label="Option2", command= doNothing)
+            windowMenu.add_command(label="Option3", command= doNothing)
+            
+            helpMenu = tk.Menu(menu)
+            menu.add_cascade(label="Help", menu=helpMenu)
+            helpMenu.add_command(label="Option1", command= doNothing)
+            helpMenu.add_command(label="Option2", command= doNothing)
+            helpMenu.add_command(label="Option3", command= doNothing)
+
+            def tick():          
+                current_time = time.strftime('%I:%M %p')
+                time_label.config(text=current_time)
+                time_label.after(200, tick)
+        
+            time_label = tk.Label(self, font =('Agency FB', 100))
+            time_label.grid(row=0, column =0)
+            tick()
+
+
+            today = date.today()
+            d4 = today.strftime("%b-%d-%Y")
+            datelbl = tk.Label(self, text= d4, font=('Agency FB', 70))
+            datelbl.grid(row=2, column=0, pady=50)
+
+            categlbl=tk.Label(self, font=('Arial bold', 15), text='Category')
+            categlbl.grid(row=1, column=1, pady=10, padx=60)
+
+            amtlbl = tk.Label(self, font=('Arial bold', 15), text='Amount')
+            amtlbl.grid(row=2, column=1)
+            
+            datelbl= tk.Label(self, font=('Arial bold', 15), text='Date')
+            datelbl.grid(row=3, column=1)
+            
+            options_list = ["Rent", "Travel", "Groceries", "Subscriptions", "Guilty Pleasures", "Income"]
+            value_inside = tk.StringVar(self)
+            value_inside.set("Select Transaction category")
+            categoryMenu = tk.OptionMenu(self, value_inside, *options_list)
+            categoryMenu.grid(row = 1, column = 2)
+            print("Selected Option: {}".format(value_inside.get()))
+            
+            amt_value = tk.StringVar(self)
+            amtEntry = tk.Entry(self, textvariable=amt_value)
+            amtEntry.grid(row = 2, column = 2)
+            
+            date_txn = tk.StringVar(self)
+            dateEntry = tk.Entry(self,textvariable=date_txn)
+            date_txn.set("dd/mm/yy")
+            dateEntry.grid(row = 3, column = 2)
+            
+            logoutbtn = tk.Button(self, bg='blue2', font=('Arial', 15), fg='White',
+                                  text='Logout',width=30,justify='left', command = lambda:self.destroy())
+            logoutbtn.grid(row=0, column=3, padx=300)
+            
+            def addedtxn(a,b,c):
+                c.execute("INSERT INTO transactions (Category, Amount , Date) VALUES (?,?,?)",
+                          (a, b, c))
+            
+            Addtxnbtn = tk.Button(self, bg='blue2', font=('Arial', 15), fg='White',
+                                  text='Add transaction',width=30,justify='left'
+                                  ,command =(lambda:addedtxn(value_inside.get(), 
+                                            int(amt_value.get()),date_txn.get()), 
+                                             lambda:tk.messagebox.showinfo
+                                             ("AmazingButler","Added Successfully")))
+            Addtxnbtn.grid(row=1, column=3, padx=300)
+            
+            cancelbtn = tk.Button(self, bg='blue2', font=('Arial', 15), fg='White',
+                                  text='Cancel and return',width=30,justify='center', command = controller.show_frame("MainMenu") )
+            cancelbtn.grid(row=2, column=3)
+            
+            
+            def addmoney(edb):
+                edb +=int(amt_value.get())
+            
+            var1 = tk.IntVar()
+            c1 = tk.Checkbutton(self, text='Money in?',font =('Arial bold', 20), variable=var1, onvalue=1, offvalue=0, 
+                                    command= addmoney)
+            c1.grid(row=4, column = 1, pady=50, padx=60)
+                
+                
+        
+        
+class editpage(tk.Frame):
+   
+   def __init__(self, parent, controller):
+         tk.Frame.__init__(self, parent)
+         self.controller = controller
+         
+         menu=tk.Menu(self)
+         self.config(menu=menu)
+         def doNothing():
+             print(" ")
+             subMenu = tk.Menu(menu)
+             menu.add_cascade(label="File", menu=subMenu)
+             subMenu.add_command(label="Option1", command= doNothing) 
+             subMenu.add_command(label="Option2", command= doNothing)
+             subMenu.add_command(label="Option3", command= doNothing)
+             
+             editMenu = tk.Menu(menu)
+             menu.add_cascade(label="Edit", menu=editMenu)
+             editMenu.add_command(label="Option1", command= doNothing)
+             editMenu.add_command(label="Option2", command= doNothing)
+             editMenu.add_command(label="Option3", command= doNothing)
+
+             optionsMenu = tk.Menu(menu)
+             menu.add_cascade(label="Options", menu=optionsMenu)
+             optionsMenu.add_command(label="Option1", command= doNothing)
+             optionsMenu.add_command(label="Option2", command= doNothing)
+             optionsMenu.add_command(label="Option3", command= doNothing)
+            
+             toolsMenu = tk.Menu(menu)
+             menu.add_cascade(label="Tools", menu=toolsMenu)
+             toolsMenu.add_command(label="Option1", command= doNothing)
+             toolsMenu.add_command(label="Option2", command= doNothing)
+             toolsMenu.add_command(label="Option3", command= doNothing)
+            
+             windowMenu = tk.Menu(menu)
+             menu.add_cascade(label="Window", menu=windowMenu)
+             windowMenu.add_command(label="Option1", command= doNothing)
+             windowMenu.add_command(label="Option2", command= doNothing)
+             windowMenu.add_command(label="Option3", command= doNothing)
+            
+             helpMenu = tk.Menu(menu)
+             menu.add_cascade(label="Help", menu=helpMenu)
+             helpMenu.add_command(label="Option1", command= doNothing)
+             helpMenu.add_command(label="Option2", command= doNothing)
+             helpMenu.add_command(label="Option3", command= doNothing)
+            
+             rangelbl = tk.Label(self, font=('Arial bold', 15), text='Date Range')
+             rangelbl.grid(row=1,column=1, padx=50, pady=60)
+            
+             frmdate_value = tk.StringVar(self)
+             frmdatebox = tk.Entry(self, textvariable=frmdate_value, width= 60)
+             frmdate_value.set("dd/mm/yy")
+             frmdatebox.grid(row = 1, column = 2, padx=40)
+            
+             todate_value = tk.StringVar(self)
+             todatebox = tk.Entry(self, textvariable=todate_value, width =60)
+             todate_value.set("dd/mm/yy")
+             todatebox.grid(row=1, column=3, padx=30)
+            
+             logoutbtn = tk.Button(self, bg='blue2', font=('Arial', 15), fg='White',
+                                  text='Logout',width=30,justify='left', command = lambda:self.destroy())
+             logoutbtn.grid(row=1, column=4, padx=60)
+            
+             acceptbtn = tk.Button(self, bg='blue2', font=('Arial', 15), fg='White',
+                                  text='Accept Changes',width=30,justify='left', command = doNothing )
+             acceptbtn.grid(row=2,column=4, padx=30)
+            
+             returnbtn=tk.Button(self,bg='blue2', font=('Arial', 15), fg='White',
+                                     text='Return',width=30,justify='left', command = controller.show_frame("MainMenu"))
+             returnbtn.grid(row=3, column=4, padx=30, pady=60)
+            
+             viewrfrshbtn = tk.Button(self,bg='blue2', font=('Arial', 15), fg='White',
+                                 text='View/Refresh',width=30,justify='left', command = doNothing)
+             viewrfrshbtn.grid(row=2, column=3)
+             
+             def csvConvert():
+                 db_df = pd.read_sql_query("SELECT * FROM transactions", conn)
+                 db_df.to_csv('txns.csv', index=False)
+
+             exportcsvbtn = tk.Button(self,bg='blue2', font=('Arial', 15), fg='White',
+                                     text='Export CSV',width=30,justify='left', command = csvConvert)
+             exportcsvbtn.grid(row=3, column=3)
+             
+             
+             r_set=c.execute('''SELECT * from transactions LIMIT 0,10''');
+             i=0 # row value inside the loop 
+             for transactions in r_set: 
+                 for j in range(len(transactions)):
+                     e = tk.Entry(self, width=10, fg='blue') 
+                     e.grid(row=i, column=j) 
+                     e.insert(r_set.END, transactions[j])
+                 i=i+1
+         
+            
+
+
+class setuppage(tk.Frame):
+    def __init__(self, parent, controller):
+         tk.Frame.__init__(self, parent)
+         self.controller = controller
+        
+         menu=tk.Menu(self)
+         self.config(menu=menu)
+         def doNothing():
+             print(" ")
+             subMenu = tk.Menu(menu)
+             menu.add_cascade(label="File", menu=subMenu)
+             subMenu.add_command(label="Option1", command= doNothing) 
+             subMenu.add_command(label="Option2", command= doNothing)
+             subMenu.add_command(label="Option3", command= doNothing)
+                 
+             editMenu = tk.Menu(menu)
+             menu.add_cascade(label="Edit", menu=editMenu)
+             editMenu.add_command(label="Option1", command= doNothing)
+             editMenu.add_command(label="Option2", command= doNothing)
+             editMenu.add_command(label="Option3", command= doNothing)
+             
+             optionsMenu = tk.Menu(menu)
+             menu.add_cascade(label="Options", menu=optionsMenu)
+             optionsMenu.add_command(label="Option1", command= doNothing)
+             optionsMenu.add_command(label="Option2", command= doNothing)
+             optionsMenu.add_command(label="Option3", command= doNothing)
+             
+             toolsMenu = tk.Menu(menu)
+             menu.add_cascade(label="Tools", menu=toolsMenu)
+             toolsMenu.add_command(label="Option1", command= doNothing)
+             toolsMenu.add_command(label="Option2", command= doNothing)
+             toolsMenu.add_command(label="Option3", command= doNothing)
+             
+             windowMenu = tk.Menu(menu)
+             menu.add_cascade(label="Window", menu=windowMenu)
+             windowMenu.add_command(label="Option1", command= doNothing)
+             windowMenu.add_command(label="Option2", command= doNothing)
+             windowMenu.add_command(label="Option3", command= doNothing)
+             
+             helpMenu = tk.Menu(menu)
+             menu.add_cascade(label="Help", menu=helpMenu)
+             helpMenu.add_command(label="Option1", command= doNothing)
+             helpMenu.add_command(label="Option2", command= doNothing)
+             helpMenu.add_command(label="Option3", command= doNothing)
+             
+             
+             file = open('amazingButlerApp.txt', 'a+')
+             save = file.read(3)
+             
+             
+             file = open('amazingButlerApp.txt', 'a+')
+             spend = file.read(4)
+             
+             
+             savinglbl = tk.Label(self, font=('Arial bold', 15), text='Saving Target')
+             savinglbl.grid(row=1, column =1, pady=100, padx=100)
+             
+             spendinglbl = tk.Label(self, font=('Arial bold', 15), text='Spending Target')
+             spendinglbl.grid(row=2, column =1, pady=100, padx=100)
+             
+             budgetlbl = tk.Label(self, font=('Arial bold', 15), text='Monthly estimated budget')
+             budgetlbl.grid(row=3, column =1, pady=100, padx=100)
+             
+             save_value = tk.IntVar(self)
+             savingEntry = tk.Entry(self, textvariable=save_value)
+             save_value.set(save)
+             savingEntry.grid(row = 1, column = 2, padx=50)
+             
+             spend_value = tk.IntVar(self)
+             spendEntry = tk.Entry(self, textvariable=spend_value)
+             spend_value.set(spend)
+             spendEntry.grid(row = 2, column = 2, padx=50)
+             
+             
+             budget_value = tk.IntVar(self)
+             budgetEntry = tk.Entry(self, textvariable=budget_value)
+             spend_value.set(spend)
+             budgetEntry.grid() 
+             
+             logoutbtn = tk.Button(self, bg='blue2', font=('Arial', 15), fg='White',
+                                   text='Logout',width=30,justify='left', command = lambda:self.destroy())
+             logoutbtn.grid(row=1, column=4, padx=60)
+             
+             
+             def editssave():
+                 
+                 file = open('amazingButlerApp.txt', 'a+')
+                 file.seek(3)
+                 file.write(save_value.get())
+                 
+             def editspend():
+                     file = open('amazingButlerApp.txt', 'a+')
+                     file.seek(4)
+                     file.write(spend_value.get())
+                     
+             acceptbtn = tk.Button(self, bg='blue2', font=('Arial', 15), fg='White',
+                                           text='Accept Changes',width=30,justify='left', command = (editssave, editspend,lambda:tk.messagebox.showinfo
+                                             ("AmazingButler","Modification Successful")))
+             acceptbtn.grid(row=2,column=4, padx=30)
+            
+             returnbtn=tk.Button(self,bg='blue2', font=('Arial', 15), fg='White',
+                                     text='Return',width=30,justify='left', command = controller.show_frame("MainMenu"))
+             returnbtn.grid(row=3, column=4, padx=30, pady=60)
+         
+        
+        
+        
+
+
+
+#class PageTwo(tk.Frame):
+
+    #def __init__(self, parent, controller):
+        #tk.Frame.__init__(self, parent)
+        #self.controller = controller
+        #label = tk.Label(self, text="This is page 2", font=controller.title_font)
+        #label.pack(side="top", fill="x", pady=10)
+        #button = tk.Button(self, text="Go to the start page",
+         #                  command=lambda: controller.show_frame("StartPage"))
+        #utton.pack()
+
+
+
+conn.commit()
+conn.close()
+if __name__ == "__main__":
+    app = SampleApp()
+    app.mainloop()
