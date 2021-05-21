@@ -233,6 +233,19 @@ class MainMenu(tk.Frame): #main mebu page UI
                                  text='Summary',width=30,justify='left', command = doNothing)
         smmarybtn.grid(row=4, column=3, padx=20, pady=40)
         
+        data1 = {'Month': ['Jan','Feb','Mar','Apr','May', 'Jun', 'Jul', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'],
+         'Saving target': [420,200,600,20,690,221,154,400,320,420,0,90]
+        }
+        df1 = DataFrame(data1,columns=['Month','Saving target'])
+
+        figure = plt.Figure(figsize=(6,5), dpi=100)
+        ax2 = figure.add_subplot(111)
+        chart_type = FigureCanvasTkAgg(figure, root)
+        chart_type.get_tk_widget().grid(row=3, column=2)
+        df1 = df1[['First Column','Second Column']].groupby('First Column').sum()
+        df1.plot(kind='line', legend=True, ax=ax2, color='r',marker='o', fontsize=10)
+        ax2.set_title('')
+        
         def lotto():
             x = random.randint(1,40000)
             file = open('amazingButlerApp.txt', 'a+')
